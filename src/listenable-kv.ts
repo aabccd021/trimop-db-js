@@ -1,4 +1,4 @@
-import { isDefined, Unsubscribe } from 'trimop';
+import { Unsubscribe, isDefined } from 'trimop';
 
 import { KVDB } from './kv';
 
@@ -23,21 +23,19 @@ export type ListenableDBController<T> = {
   readonly subscribe: (key: string, listen: Listen<T>) => Unsubscribe | undefined;
 };
 
-export function getListenableDB<T>(db: KVDB<Listenable<T>>): ListenableDBController<T> {
+export function getListenableKVDB<T>(db: KVDB<Listenable<T>>): ListenableDBController<T> {
   return {
+    del: db.del,
+    get: (key) => db.get(key)?.state,
     reset: db.reset,
     set: (key, newState) => {
       const cachedObservable = db.get(key);
       cachedObservable?.listens.forEach((listener) => listener(newState));
-
-      const updatedObservable: Listenable<T> = {
+      db.set(key, {
         listens: cachedObservable?.listens ?? [],
         state: newState,
-      };
-      db.set(key, updatedObservable);
+      });
     },
-    get: (key) => db.get(key)?.state,
-    del: db.del,
     subscribe: (key, newListen) => {
       const cachedListenable = db.get(key);
       newListen(cachedListenable?.state);
@@ -46,15 +44,15 @@ export function getListenableDB<T>(db: KVDB<Listenable<T>>): ListenableDBControl
       }
       db.set(key, {
         ...cachedListenable,
-        listens: [...(cachedListenable?.listens ?? []), newListen],
+        listens: [...cachedListenable.listens, newListen],
       });
       return () => {
         const obs = db.get(key);
         if (isDefined(obs)) {
-          // remove unused listen
+          // Remove unused listen
           const updatedObservable = {
             ...obs,
-            listens: obs?.listens.filter((el) => el !== newListen) ?? [],
+            listens: obs.listens.filter((el) => el !== newListen),
           };
           db.set(key, updatedObservable);
         }
