@@ -1,0 +1,146 @@
+{
+  "name": "trimop-kv-db",
+  "version": "0.1.0",
+  "description": "TRIMOP implementation of key-value database",
+  "author": "aabccd021 <aabccd021@gmail.com>",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/cjs/index.js",
+  "module": "dist/mjs/index.js",
+  "exports": {
+    ".": {
+      "node": "./dist/cjs/index.js",
+      "default": "./dist/mjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc --build tsconfig.mjs.json && tsc --build tsconfig.cjs.json",
+    "lint": "eslint . --ext ts",
+    "test": "jest --coverage --verbose"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.23.0",
+    "eslint": "^7.26.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-functional": "^3.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.6",
+    "eslint-plugin-no-null": "^1.0.2",
+    "eslint-plugin-only-warn": "^1.0.2",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-unused-imports": "^1.0.1",
+    "jest": "^27.0.6",
+    "prettier": "^2.2.1",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.2.4"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/test/**/*.test.ts"
+    ]
+  },
+  "eslintConfig": {
+    "ignorePatterns": [
+      "lib/**",
+      "dist/**"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint",
+      "functional",
+      "import",
+      "jest",
+      "no-null",
+      "only-warn",
+      "simple-import-sort",
+      "unused-imports"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:functional/all",
+      "plugin:import/errors",
+      "plugin:import/typescript",
+      "plugin:import/warnings",
+      "plugin:jest/recommended",
+      "plugin:jest/style",
+      "plugin:prettier/recommended",
+      "prettier"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "test/**/*.ts"
+        ],
+        "rules": {
+          "no-null/no-null": "off"
+        }
+      }
+    ],
+    "rules": {
+      "func-style": [
+        "warn",
+        "declaration"
+      ],
+      "eqeqeq": "warn",
+      "max-len": [
+        "warn",
+        {
+          "code": 100,
+          "comments": 100,
+          "ignoreStrings": true,
+          "ignoreTemplateLiterals": true
+        }
+      ],
+      "max-params": [
+        "warn",
+        3
+      ],
+      "curly": [
+        "warn",
+        "all"
+      ],
+      "@typescript-eslint/no-unused-vars": "off",
+      "unused-imports/no-unused-imports-ts": "warn",
+      "functional/no-return-void": "off",
+      "functional/no-expression-statement": "off",
+      "functional/functional-parameters": "off",
+      "functional/no-conditional-statement": "off",
+      "unused-imports/no-unused-vars": [
+        "warn",
+        {
+          "vars": "all",
+          "varsIgnorePattern": "^_",
+          "args": "after-used",
+          "argsIgnorePattern": "^_"
+        }
+      ],
+      "import/no-cycle": "warn",
+      "import/exports-last": "warn",
+      "import/first": "warn",
+      "import/no-named-default": "warn",
+      "import/no-namespace": "warn",
+      "import/no-useless-path-segments": "warn",
+      "no-null/no-null": "warn",
+      "simple-import-sort/exports": "warn",
+      "simple-import-sort/imports": "warn",
+      "prettier/prettier": [
+        "warn",
+        {
+          "singleQuote": true,
+          "printWidth": 100
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "trimop": "^0.1.4"
+  }
+}
