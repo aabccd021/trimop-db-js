@@ -1,62 +1,80 @@
-import { Listen, Listenable, getKVDB, getListenableKVDB } from '../src';
+import { Listen, getKVDB, getListenableKVDB } from '../src';
 
 describe('getListenableKVDB', () => {
   describe('get()', () => {
     it('returns undefined when the key is never set', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
-      const value = db.get('newKey');
+      const db = getListenableKVDB<string>(getKVDB);
 
+      const value = db.get('newKey');
       expect(value).toBeUndefined();
     });
 
     it('returns the state after its set', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
       db.set('fooKey', 'barValue');
-      const value = db.get('fooKey');
 
+      const value = db.get('fooKey');
       expect(value).toEqual('barValue');
     });
 
     it('returns undefined after set then deleted', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
       db.set('fooKey', 'barValue');
       db.del('fooKey');
-      const value = db.get('fooKey');
 
+      const value = db.get('fooKey');
       expect(value).toBeUndefined();
     });
 
     it('returns undefined after set then reset', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
       db.set('fooKey', 'barValue');
       db.reset();
-      const value = db.get('fooKey');
 
+      const value = db.get('fooKey');
       expect(value).toBeUndefined();
     });
   });
 
   describe('reset()', () => {
     it('does not reset another db', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
-      const db2 = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
+      const db2 = getListenableKVDB<string>(getKVDB);
       db.set('fooKey', 'barValue');
-      const value = db.get('fooKey');
       db2.reset();
 
+      const value = db.get('fooKey');
+      expect(value).toEqual('barValue');
+    });
+  });
+
+  describe('set()', () => {
+    it('does not set state on another db', () => {
+      const db = getListenableKVDB<string>(getKVDB);
+      const db2 = getListenableKVDB<string>(getKVDB);
+      db.set('fooKey', 'barValue');
+      db2.set('fooKey', 'kira');
+
+      const value = db.get('fooKey');
+      expect(value).toEqual('barValue');
+    });
+  });
+
+  describe('del()', () => {
+    it('does not delete state on another db', () => {
+      const db = getListenableKVDB<string>(getKVDB);
+      const db2 = getListenableKVDB<string>(getKVDB);
+      db.set('fooKey', 'barValue');
+      db2.del('fooKey');
+
+      const value = db.get('fooKey');
       expect(value).toEqual('barValue');
     });
   });
 
   describe('subscribe()', () => {
     it('invoke listen when start subscribing', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
       db.set('fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
       const unsubscribe = db.subscribe('fooKey', mockedListen);
@@ -68,8 +86,7 @@ describe('getListenableKVDB', () => {
     });
 
     it('invoke listen when the state changes', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
       db.set('fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
       const unsubscribe = db.subscribe('fooKey', mockedListen);
@@ -83,8 +100,7 @@ describe('getListenableKVDB', () => {
     });
 
     it('does not invoke listen after unsubscribed', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
       db.set('fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
       const unsubscribe = db.subscribe('fooKey', mockedListen);
@@ -96,8 +112,7 @@ describe('getListenableKVDB', () => {
     });
 
     it('returns unsubscribe if state exists before subscription', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
       db.set('fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
       const unsubscribe = db.subscribe('fooKey', mockedListen);
@@ -108,12 +123,25 @@ describe('getListenableKVDB', () => {
     });
 
     it('returns undefined if state does not exists before subscription', () => {
-      const kvdb = getKVDB<Listenable<string>>();
-      const db = getListenableKVDB(kvdb);
+      const db = getListenableKVDB<string>(getKVDB);
       const mockedListen = jest.fn() as Listen<string>;
       const unsubscribe = db.subscribe('fooKey', mockedListen);
 
       expect(unsubscribe).toBeUndefined();
+    });
+
+    it('does not listen to another db', () => {
+      const db = getListenableKVDB<string>(getKVDB);
+      const db2 = getListenableKVDB<string>(getKVDB);
+      db.set('fooKey', 'barValue');
+      const mockedListen = jest.fn() as Listen<string>;
+      const unsubscribe = db.subscribe('fooKey', mockedListen);
+      db2.set('fooKey', 'kira');
+
+      expect(mockedListen).toHaveBeenCalledTimes(1);
+      expect(mockedListen).toHaveBeenCalledWith('barValue');
+
+      unsubscribe?.();
     });
   });
 });

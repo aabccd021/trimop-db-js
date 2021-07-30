@@ -23,7 +23,10 @@ export type ListenableDBController<T> = {
   readonly subscribe: (key: string, listen: Listen<T>) => Unsubscribe | undefined;
 };
 
-export function getListenableKVDB<T>(db: KVDB<Listenable<T>>): ListenableDBController<T> {
+export function getListenableKVDB<T>(
+  getKVDB: () => KVDB<Listenable<T>>
+): ListenableDBController<T> {
+  const db = getKVDB();
   return {
     del: db.del,
     get: (key) => db.get(key)?.state,

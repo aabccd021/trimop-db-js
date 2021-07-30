@@ -41,9 +41,33 @@ describe('getKVDB', () => {
       const db = getKVDB();
       const db2 = getKVDB();
       db.set('fooKey', 'barValue');
-      const value = db.get('fooKey');
       db2.reset();
 
+      const value = db.get('fooKey');
+      expect(value).toEqual('barValue');
+    });
+  });
+
+  describe('set()', () => {
+    it('does not set state on another db', () => {
+      const db = getKVDB();
+      const db2 = getKVDB();
+      db.set('fooKey', 'barValue');
+      db2.set('fooKey', 'kira');
+
+      const value = db.get('fooKey');
+      expect(value).toEqual('barValue');
+    });
+  });
+
+  describe('del()', () => {
+    it('does not delete state on another db', () => {
+      const db = getKVDB();
+      const db2 = getKVDB();
+      db.set('fooKey', 'barValue');
+      db2.del('fooKey');
+
+      const value = db.get('fooKey');
       expect(value).toEqual('barValue');
     });
   });
