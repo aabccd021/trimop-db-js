@@ -62,7 +62,7 @@ describe('KV', () => {
     });
   });
 
-  describe('delRecordKV', () => {
+  describe('deleteRecordKV', () => {
     it('does not delete state on another db', () => {
       const db = useState<DB>({});
       const db2 = useState<DB>({});

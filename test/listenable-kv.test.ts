@@ -174,6 +174,22 @@ describe('ListenableKV', () => {
       expect(mockedListen).toHaveBeenCalledWith('barValue');
     });
 
+    it('does not throw error when unsubscribed after deleting the state', () => {
+      const db = useState<DB>({});
+
+      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
+      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
+      const del: DeleteRecordKV = (key) => deleteRecordKV(db, key);
+
+      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
+      const mockedListen = jest.fn() as Listen<string>;
+      const unsubscribe = subscribeLKV(get, set, 'fooKey', mockedListen);
+
+      deleteRecordLKV(del, 'fooKey');
+
+      expect(unsubscribe).not.toThrow();
+    });
+
     it('returns unsubscribe if state exists before subscription', () => {
       const db = useState<DB>({});
 

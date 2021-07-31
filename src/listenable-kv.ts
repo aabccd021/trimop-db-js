@@ -43,6 +43,8 @@ export function deleteRecordLKV(deleteKV: DeleteRecordKV, key: string): void {
 
 /**
  * Subscribe to a state
+ * @param getRecordKV
+ * @param setRecordKV
  * @param key of the state
  * @param newListen which will be called every time the state changes
  * @returns unsubscribe function if the state exists, otherwise returns undefined
