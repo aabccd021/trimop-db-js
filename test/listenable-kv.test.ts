@@ -20,7 +20,7 @@ import {
 } from '../src';
 
 describe('ListenableKV', () => {
-  describe('get()', () => {
+  describe('getRecordLKV', () => {
     it('returns undefined when the key is never set', () => {
       const db = useState<DB>({});
 
@@ -71,7 +71,7 @@ describe('ListenableKV', () => {
     });
   });
 
-  describe('reset()', () => {
+  describe('clearLKV', () => {
     it('does not reset another db', () => {
       const db = useState<DB>({});
       const db2 = useState<DB>({});
@@ -88,7 +88,7 @@ describe('ListenableKV', () => {
     });
   });
 
-  describe('set()', () => {
+  describe('setRecordLKV', () => {
     it('does not set state on another db', () => {
       const db = useState<DB>({});
       const db2 = useState<DB>({});
@@ -106,7 +106,7 @@ describe('ListenableKV', () => {
     });
   });
 
-  describe('del()', () => {
+  describe('deleteRecordLKV', () => {
     it('does not delete state on another db', () => {
       const db = useState<DB>({});
       const db2 = useState<DB>({});
@@ -123,7 +123,7 @@ describe('ListenableKV', () => {
     });
   });
 
-  describe('subscribe()', () => {
+  describe('subscribeLKV', () => {
     it('invoke listen when start subscribing', () => {
       const db = useState<DB>({});
 
