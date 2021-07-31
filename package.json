@@ -1,6 +1,6 @@
 {
   "name": "trimop-kv-db",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "TRIMOP implementation of key-value database",
   "author": "aabccd021 <aabccd021@gmail.com>",
   "license": "MIT",
