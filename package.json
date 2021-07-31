@@ -100,10 +100,6 @@
       "prefer-destructuring": "warn",
       "prefer-template": "warn",
       "sort-imports": "warn",
-      "func-style": [
-        "warn",
-        "declaration"
-      ],
       "eqeqeq": "warn",
       "max-len": [
         "warn",
@@ -113,10 +109,6 @@
           "ignoreStrings": true,
           "ignoreTemplateLiterals": true
         }
-      ],
-      "max-params": [
-        "warn",
-        3
       ],
       "curly": [
         "warn",

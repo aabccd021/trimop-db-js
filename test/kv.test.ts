@@ -1,73 +1,74 @@
-import { getKVDB } from '../src';
+import { useState } from 'trimop';
+import { DB, clearKV, deleteRecordKV, getRecordKV, setRecordKV } from '../src';
 
-describe('getKVDB', () => {
-  describe('get()', () => {
+describe('KV', () => {
+  describe('getRecordKV', () => {
     it('returns undefined when the key is never set', () => {
-      const db = getKVDB();
-      const value = db.get('newKey');
+      const db = useState<DB>({});
+      const value = getRecordKV(db, 'newKey');
 
       expect(value).toBeUndefined();
     });
 
     it('returns the state after its set', () => {
-      const db = getKVDB();
-      db.set('fooKey', 'barValue');
-      const value = db.get('fooKey');
+      const db = useState<DB>({});
+      setRecordKV(db, 'fooKey', 'barValue');
+      const value = getRecordKV(db, 'fooKey');
 
       expect(value).toEqual('barValue');
     });
 
     it('returns undefined after set then deleted', () => {
-      const db = getKVDB();
-      db.set('fooKey', 'barValue');
-      db.del('fooKey');
-      const value = db.get('fooKey');
+      const db = useState<DB>({});
+      setRecordKV(db, 'fooKey', 'barValue');
+      deleteRecordKV(db, 'fooKey');
+      const value = getRecordKV(db, 'fooKey');
 
       expect(value).toBeUndefined();
     });
 
     it('returns undefined after set then reset', () => {
-      const db = getKVDB();
-      db.set('fooKey', 'barValue');
-      db.reset();
-      const value = db.get('fooKey');
+      const db = useState<DB>({});
+      setRecordKV(db, 'fooKey', 'barValue');
+      clearKV(db);
+      const value = getRecordKV(db, 'fooKey');
 
       expect(value).toBeUndefined();
     });
   });
 
-  describe('reset()', () => {
+  describe('clearKV', () => {
     it('does not reset another db', () => {
-      const db = getKVDB();
-      const db2 = getKVDB();
-      db.set('fooKey', 'barValue');
-      db2.reset();
+      const db = useState<DB>({});
+      const db2 = useState<DB>({});
+      setRecordKV(db, 'fooKey', 'barValue');
+      clearKV(db2);
 
-      const value = db.get('fooKey');
+      const value = getRecordKV(db, 'fooKey');
       expect(value).toEqual('barValue');
     });
   });
 
-  describe('set()', () => {
+  describe('setRecordKV', () => {
     it('does not set state on another db', () => {
-      const db = getKVDB();
-      const db2 = getKVDB();
-      db.set('fooKey', 'barValue');
-      db2.set('fooKey', 'kira');
+      const db = useState<DB>({});
+      const db2 = useState<DB>({});
+      setRecordKV(db, 'fooKey', 'barValue');
+      setRecordKV(db2, 'fooKey', 'kira');
 
-      const value = db.get('fooKey');
+      const value = getRecordKV(db, 'fooKey');
       expect(value).toEqual('barValue');
     });
   });
 
-  describe('del()', () => {
+  describe('delRecordKV', () => {
     it('does not delete state on another db', () => {
-      const db = getKVDB();
-      const db2 = getKVDB();
-      db.set('fooKey', 'barValue');
-      db2.del('fooKey');
+      const db = useState<DB>({});
+      const db2 = useState<DB>({});
+      setRecordKV(db, 'fooKey', 'barValue');
+      deleteRecordKV(db2, 'fooKey');
 
-      const value = db.get('fooKey');
+      const value = getRecordKV(db, 'fooKey');
       expect(value).toEqual('barValue');
     });
   });

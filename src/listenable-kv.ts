@@ -1,6 +1,10 @@
 import { Unsubscribe, isDefined } from 'trimop';
 
-import { KVDB } from './kv';
+export type InitKV = () => string;
+export type ClearKV = () => void;
+export type DeleteRecordKV = (key: string) => void;
+export type GetRecordKV<T = unknown> = (key: string) => T | undefined;
+export type SetRecordKV<T = unknown> = (key: string, value: T) => void;
 
 export type Listen<T> = (value: T | undefined) => void;
 
@@ -9,57 +13,82 @@ export type Listenable<T> = {
   readonly listens: readonly Listen<T>[];
 };
 
-export type ListenableDBController<T> = {
-  readonly reset: () => void;
-  readonly set: (key: string, newState: T) => void;
-  readonly get: (key: string) => T | undefined;
-  readonly del: (key: string) => void;
-  /**
-   * Subscribe to a state
-   * @param key of the state
-   * @param newListen which will be called every time the state changes
-   * @returns unsubscribe function if the state exists, otherwise returns undefined
-   */
-  readonly subscribe: (key: string, listen: Listen<T>) => Unsubscribe | undefined;
-};
+export function initLKV(initKV: InitKV): string {
+  return initKV();
+}
 
-export function getListenableKVDB<T>(
-  getKVDB: () => KVDB<Listenable<T>>
-): ListenableDBController<T> {
-  const db = getKVDB();
-  return {
-    del: db.del,
-    get: (key) => db.get(key)?.state,
-    reset: db.reset,
-    set: (key, newState) => {
-      const cachedObservable = db.get(key);
-      cachedObservable?.listens.forEach((listener) => listener(newState));
-      db.set(key, {
-        listens: cachedObservable?.listens ?? [],
-        state: newState,
-      });
-    },
-    subscribe: (key, newListen) => {
-      const cachedListenable = db.get(key);
-      newListen(cachedListenable?.state);
-      if (!isDefined(cachedListenable)) {
-        return undefined;
-      }
-      db.set(key, {
+export function clearLKV(clearKV: ClearKV): void {
+  clearKV();
+}
+
+export function getRecordLKV<T>(
+  getRecordKV: GetRecordKV<Listenable<T>>,
+  key: string
+): T | undefined {
+  return getRecordKV(key)?.state;
+}
+
+export function setRecordLKV<T>(
+  getRecordKV: GetRecordKV<Listenable<T>>,
+  setRecordKV: SetRecordKV<Listenable<T>>,
+  key: string,
+  newState: T
+): void {
+  const cachedListenable = getRecordKV(key);
+  cachedListenable?.listens.forEach((listener) => listener(newState));
+  setRecordKV(key, {
+    listens: cachedListenable?.listens ?? [],
+    state: newState,
+  });
+}
+
+export function deleteRecordLKV(deleteKV: DeleteRecordKV, key: string): void {
+  deleteKV(key);
+}
+
+export function setLKV<T>(
+  getRecordKV: GetRecordKV<Listenable<T>>,
+  setRecordKV: SetRecordKV<Listenable<T>>,
+  key: string,
+  newState: T
+): void {
+  const cachedListenable = getRecordKV(key);
+  cachedListenable?.listens.forEach((listener) => listener(newState));
+  setRecordKV(key, {
+    listens: cachedListenable?.listens ?? [],
+    state: newState,
+  });
+}
+
+/**
+ * Subscribe to a state
+ * @param key of the state
+ * @param newListen which will be called every time the state changes
+ * @returns unsubscribe function if the state exists, otherwise returns undefined
+ */
+export function subscribeLKV<T>(
+  getRecordKV: GetRecordKV<Listenable<T>>,
+  setRecordKV: SetRecordKV<Listenable<T>>,
+  key: string,
+  newListen: Listen<T>
+): Unsubscribe | undefined {
+  const cachedListenable = getRecordKV(key);
+  newListen(cachedListenable?.state);
+  if (!isDefined(cachedListenable)) {
+    return undefined;
+  }
+  setRecordKV(key, {
+    ...cachedListenable,
+    listens: [...cachedListenable.listens, newListen],
+  });
+  return () => {
+    const cachedListenable = getRecordKV(key);
+    if (isDefined(cachedListenable)) {
+      // Remove unused listen
+      setRecordKV(key, {
         ...cachedListenable,
-        listens: [...cachedListenable.listens, newListen],
+        listens: cachedListenable.listens.filter((el) => el !== newListen),
       });
-      return () => {
-        const obs = db.get(key);
-        if (isDefined(obs)) {
-          // Remove unused listen
-          const updatedObservable = {
-            ...obs,
-            listens: obs.listens.filter((el) => el !== newListen),
-          };
-          db.set(key, updatedObservable);
-        }
-      };
-    },
+    }
   };
 }
