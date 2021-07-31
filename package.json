@@ -36,6 +36,8 @@
     "eslint-plugin-only-warn": "^1.0.2",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-sort-keys-fix": "^1.1.1",
+    "eslint-plugin-typescript-sort-keys": "^1.7.0",
     "eslint-plugin-unused-imports": "^1.0.1",
     "jest": "^27.0.6",
     "prettier": "^2.2.1",
@@ -63,6 +65,8 @@
       "no-null",
       "only-warn",
       "simple-import-sort",
+      "sort-keys-fix",
+      "typescript-sort-keys",
       "unused-imports"
     ],
     "extends": [
@@ -75,6 +79,7 @@
       "plugin:jest/recommended",
       "plugin:jest/style",
       "plugin:prettier/recommended",
+      "plugin:typescript-sort-keys/recommended",
       "prettier"
     ],
     "overrides": [
@@ -120,6 +125,7 @@
       "functional/no-expression-statement": "off",
       "functional/functional-parameters": "off",
       "functional/no-conditional-statement": "off",
+      "sort-keys-fix/sort-keys-fix": "warn",
       "unused-imports/no-unused-vars": [
         "warn",
         {
@@ -146,5 +152,6 @@
         }
       ]
     }
+
   }
 }

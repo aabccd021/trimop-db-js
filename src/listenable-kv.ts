@@ -8,8 +8,8 @@ export type SetRecordKV<T = unknown> = (key: string, value: T) => void;
 export type Listen<T> = (value: T | undefined) => void;
 
 export type Listenable<T> = {
-  readonly state: T;
   readonly listens: readonly Listen<T>[];
+  readonly state: T;
 };
 
 export function clearLKV(clearKV: ClearKV): void {
