@@ -10,15 +10,15 @@ import {
 } from './apply-listenable-kv';
 import { clearKV, DB, deleteRecordKV, getRecordKV, setRecordKV } from './kv';
 
-export function clearLKV(db: StateController<DB>): void {
-  applyClearListenable(() => clearKV(db));
+export function clearLKV(db: StateController<DB>): undefined {
+  return applyClearListenable(() => clearKV(db));
 }
 
 export function getRecordLKV<T>(db: StateController<DB>, key: string): T | undefined {
   return applyGetRecordListenable((key) => getRecordKV(db, key), key);
 }
 
-export function setRecordLKV<T>(db: StateController<DB>, key: string, newState: T): void {
+export function setRecordLKV<T>(db: StateController<DB>, key: string, newState: T): undefined {
   return applySetRecordListenable(
     (key) => getRecordKV(db, key),
     (key, value) => setRecordKV(db, key, value),
@@ -27,8 +27,8 @@ export function setRecordLKV<T>(db: StateController<DB>, key: string, newState: 
   );
 }
 
-export function deleteRecordLKV(db: StateController<DB>, key: string): void {
-  applyDeleteRecordListenable((key) => deleteRecordKV(db, key), key);
+export function deleteRecordLKV(db: StateController<DB>, key: string): undefined {
+  return applyDeleteRecordListenable((key) => deleteRecordKV(db, key), key);
 }
 
 export function subscribeRecordLKV<T>(

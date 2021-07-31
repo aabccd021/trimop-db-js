@@ -1,19 +1,19 @@
-import { isDefined, Unsubscribe } from 'trimop';
+import { Dispose, isDefined, Unsubscribe } from 'trimop';
 
-export type ClearKV = () => void;
-export type DeleteRecordKV = (key: string) => void;
+export type ClearKV = Dispose;
+export type DeleteRecordKV = (key: string) => undefined;
 export type GetRecordKV<T = unknown> = (key: string) => T | undefined;
-export type SetRecordKV<T = unknown> = (key: string, value: T) => void;
+export type SetRecordKV<T = unknown> = (key: string, value: T) => undefined;
 
-export type Listen<T> = (value: T | undefined) => void;
+export type Listen<T> = (value: T | undefined) => undefined;
 
 export type Listenable<T> = {
-  readonly state: T;
   readonly listens: readonly Listen<T>[];
+  readonly state: T;
 };
 
-export function applyClearListenable(clearKV: ClearKV): void {
-  clearKV();
+export function applyClearListenable(clearKV: ClearKV): undefined {
+  return clearKV();
 }
 
 export function applyGetRecordListenable<T>(
@@ -28,17 +28,17 @@ export function applySetRecordListenable<T>(
   setRecordKV: SetRecordKV<Listenable<T>>,
   key: string,
   newState: T
-): void {
+): undefined {
   const cachedListenable = getRecordKV(key);
   cachedListenable?.listens.forEach((listener) => listener(newState));
-  setRecordKV(key, {
+  return setRecordKV(key, {
     listens: cachedListenable?.listens ?? [],
     state: newState,
   });
 }
 
-export function applyDeleteRecordListenable(deleteKV: DeleteRecordKV, key: string): void {
-  deleteKV(key);
+export function applyDeleteRecordListenable(deleteKV: DeleteRecordKV, key: string): undefined {
+  return deleteKV(key);
 }
 
 /**
@@ -73,5 +73,6 @@ export function applySubscribeRecordListenable<T>(
         listens: cachedListenable.listens.filter((el) => el !== newListen),
       });
     }
+    return undefined;
   };
 }
