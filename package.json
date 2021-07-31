@@ -99,7 +99,6 @@
       "no-else-return": "warn",
       "no-useless-return": "warn",
       "no-undef-init": "warn",
-      "capitalized-comments": "warn",
       "no-useless-rename": "warn",
       "object-shorthand": "warn",
       "prefer-arrow-callback": "warn",

@@ -1,2 +1,2 @@
-# Trimop
-Utility for TRee-shakeable, IMmutable and language interOPerable programming.
+# TRIMOP DB
+TRIMOP implementation of key-value database
