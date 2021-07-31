@@ -1,72 +1,49 @@
 import { useState } from 'trimop';
 
+import { DB, Listen } from '../src';
 import {
-  ClearKV,
-  clearKV,
   clearLKV,
-  DB,
-  DeleteRecordKV,
-  deleteRecordKV,
   deleteRecordLKV,
-  GetRecordKV,
-  getRecordKV,
   getRecordLKV,
-  Listen,
-  Listenable,
-  SetRecordKV,
-  setRecordKV,
   setRecordLKV,
-  subscribeLKV,
-} from '../src';
+  subscribeRecordLKV,
+} from '../src/listenable-kv';
 
 describe('ListenableKV', () => {
   describe('getRecordLKV', () => {
     it('returns undefined when the key is never set', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-
-      const value = getRecordLKV<string>(get, 'fooKey');
+      const value = getRecordLKV<string>(db, 'fooKey');
       expect(value).toBeUndefined();
     });
 
     it('returns the state after its set', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
 
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
-
-      const value = getRecordLKV<string>(get, 'fooKey');
+      const value = getRecordLKV<string>(db, 'fooKey');
       expect(value).toEqual('barValue');
     });
 
     it('returns undefined after set then deleted', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-      const del: DeleteRecordKV = (key) => deleteRecordKV(db, key);
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
+      deleteRecordLKV(db, 'fooKey');
 
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
-      deleteRecordLKV(del, 'fooKey');
-
-      const value = getRecordLKV<string>(get, 'fooKey');
+      const value = getRecordLKV<string>(db, 'fooKey');
       expect(value).toBeUndefined();
     });
 
     it('returns undefined after set then reset', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-      const clear: ClearKV = () => clearKV(db);
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
+      clearLKV(db);
 
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
-      clearLKV(clear);
-
-      const value = getRecordLKV<string>(get, 'fooKey');
+      const value = getRecordLKV<string>(db, 'fooKey');
       expect(value).toBeUndefined();
     });
   });
@@ -76,14 +53,10 @@ describe('ListenableKV', () => {
       const db = useState<DB>({});
       const db2 = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-      const clear2: ClearKV = () => clearKV(db2);
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
+      clearLKV(db2);
 
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
-      clearLKV(clear2);
-
-      const value = getRecordLKV<string>(get, 'fooKey');
+      const value = getRecordLKV<string>(db, 'fooKey');
       expect(value).toEqual('barValue');
     });
   });
@@ -93,15 +66,10 @@ describe('ListenableKV', () => {
       const db = useState<DB>({});
       const db2 = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-      const get2: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db2, key);
-      const set2: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db2, key, value);
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
+      setRecordLKV<string>(db2, 'fooKey', 'barValue');
 
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
-      setRecordLKV<string>(get2, set2, 'fooKey', 'barValue');
-
-      const value = getRecordLKV<string>(get, 'fooKey');
+      const value = getRecordLKV<string>(db, 'fooKey');
       expect(value).toEqual('barValue');
     });
   });
@@ -111,28 +79,21 @@ describe('ListenableKV', () => {
       const db = useState<DB>({});
       const db2 = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-      const del2: DeleteRecordKV = (key) => deleteRecordKV(db2, key);
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
+      deleteRecordLKV(db2, 'fooKey');
 
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
-      deleteRecordLKV(del2, 'fooKey');
-
-      const value = getRecordLKV<string>(get, 'fooKey');
+      const value = getRecordLKV<string>(db, 'fooKey');
       expect(value).toEqual('barValue');
     });
   });
 
-  describe('subscribeLKV', () => {
+  describe('subscribeRecordLKV', () => {
     it('invoke listen when start subscribing', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
-      const unsubscribe = subscribeLKV(get, set, 'fooKey', mockedListen);
+      const unsubscribe = subscribeRecordLKV(db, 'fooKey', mockedListen);
 
       expect(mockedListen).toHaveBeenCalledTimes(1);
       expect(mockedListen).toHaveBeenCalledWith('barValue');
@@ -143,13 +104,10 @@ describe('ListenableKV', () => {
     it('invoke listen when the state changes', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
-      const unsubscribe = subscribeLKV(get, set, 'fooKey', mockedListen);
-      setRecordLKV<string>(get, set, 'fooKey', 'kira');
+      const unsubscribe = subscribeRecordLKV(db, 'fooKey', mockedListen);
+      setRecordLKV<string>(db, 'fooKey', 'kira');
 
       expect(mockedListen).toHaveBeenCalledTimes(2);
       expect(mockedListen).toHaveBeenNthCalledWith(1, 'barValue');
@@ -161,14 +119,11 @@ describe('ListenableKV', () => {
     it('does not invoke listen after unsubscribed', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
-      const unsubscribe = subscribeLKV(get, set, 'fooKey', mockedListen);
+      const unsubscribe = subscribeRecordLKV(db, 'fooKey', mockedListen);
       unsubscribe?.();
-      setRecordLKV<string>(get, set, 'fooKey', 'kira');
+      setRecordLKV<string>(db, 'fooKey', 'kira');
 
       expect(mockedListen).toHaveBeenCalledTimes(1);
       expect(mockedListen).toHaveBeenCalledWith('barValue');
@@ -177,15 +132,11 @@ describe('ListenableKV', () => {
     it('does not throw error when unsubscribed after deleting the state', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-      const del: DeleteRecordKV = (key) => deleteRecordKV(db, key);
-
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
-      const unsubscribe = subscribeLKV(get, set, 'fooKey', mockedListen);
+      const unsubscribe = subscribeRecordLKV(db, 'fooKey', mockedListen);
 
-      deleteRecordLKV(del, 'fooKey');
+      deleteRecordLKV(db, 'fooKey');
 
       expect(unsubscribe).not.toThrow();
     });
@@ -193,12 +144,9 @@ describe('ListenableKV', () => {
     it('returns unsubscribe if state exists before subscription', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
-      const unsubscribe = subscribeLKV(get, set, 'fooKey', mockedListen);
+      const unsubscribe = subscribeRecordLKV(db, 'fooKey', mockedListen);
 
       expect(unsubscribe).toBeDefined();
 
@@ -208,11 +156,8 @@ describe('ListenableKV', () => {
     it('returns undefined if state does not exists before subscription', () => {
       const db = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-
       const mockedListen = jest.fn() as Listen<string>;
-      const unsubscribe = subscribeLKV(get, set, 'fooKey', mockedListen);
+      const unsubscribe = subscribeRecordLKV(db, 'fooKey', mockedListen);
 
       expect(unsubscribe).toBeUndefined();
     });
@@ -221,15 +166,10 @@ describe('ListenableKV', () => {
       const db = useState<DB>({});
       const db2 = useState<DB>({});
 
-      const get: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db, key);
-      const set: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db, key, value);
-      const get2: GetRecordKV<Listenable<string>> = (key) => getRecordKV(db2, key);
-      const set2: SetRecordKV<Listenable<string>> = (key, value) => setRecordKV(db2, key, value);
-
-      setRecordLKV<string>(get, set, 'fooKey', 'barValue');
+      setRecordLKV<string>(db, 'fooKey', 'barValue');
       const mockedListen = jest.fn() as Listen<string>;
-      const unsubscribe = subscribeLKV(get, set, 'fooKey', mockedListen);
-      setRecordLKV<string>(get2, set2, 'fooKey', 'kira');
+      const unsubscribe = subscribeRecordLKV(db, 'fooKey', mockedListen);
+      setRecordLKV<string>(db2, 'fooKey', 'kira');
 
       expect(mockedListen).toHaveBeenCalledTimes(1);
       expect(mockedListen).toHaveBeenCalledWith('barValue');

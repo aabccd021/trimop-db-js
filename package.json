@@ -18,7 +18,8 @@
   "scripts": {
     "build": "rm -rf dist && tsc --build tsconfig.mjs.json && tsc --build tsconfig.cjs.json",
     "lint": "eslint . --ext ts",
-    "test": "jest --coverage --verbose"
+    "test": "jest --coverage --verbose",
+    "release": "yarn tsc --noEmit && yarn lint --fix && yarn test && git pull origin main --no-edit && npm version patch && git push"
   },
   "dependencies": {
     "trimop": "^0.1.4"

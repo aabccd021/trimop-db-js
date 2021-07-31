@@ -1,77 +1,45 @@
-import { isDefined, Unsubscribe } from 'trimop';
+import { StateController, Unsubscribe } from 'trimop';
 
-export type ClearKV = () => void;
-export type DeleteRecordKV = (key: string) => void;
-export type GetRecordKV<T = unknown> = (key: string) => T | undefined;
-export type SetRecordKV<T = unknown> = (key: string, value: T) => void;
+import {
+  applyClearListenable,
+  applyDeleteRecordListenable,
+  applyGetRecordListenable,
+  applySetRecordListenable,
+  applySubscribeRecordListenable,
+  Listen,
+} from './apply-listenable-kv';
+import { clearKV, DB, deleteRecordKV, getRecordKV, setRecordKV } from './kv';
 
-export type Listen<T> = (value: T | undefined) => void;
-
-export type Listenable<T> = {
-  readonly state: T;
-  readonly listens: readonly Listen<T>[];
-};
-
-export function clearLKV(clearKV: ClearKV): void {
-  clearKV();
+export function clearLKV(db: StateController<DB>): void {
+  applyClearListenable(() => clearKV(db));
 }
 
-export function getRecordLKV<T>(
-  getRecordKV: GetRecordKV<Listenable<T>>,
-  key: string
-): T | undefined {
-  return getRecordKV(key)?.state;
+export function getRecordLKV<T>(db: StateController<DB>, key: string): T | undefined {
+  return applyGetRecordListenable((key) => getRecordKV(db, key), key);
 }
 
-export function setRecordLKV<T>(
-  getRecordKV: GetRecordKV<Listenable<T>>,
-  setRecordKV: SetRecordKV<Listenable<T>>,
-  key: string,
-  newState: T
-): void {
-  const cachedListenable = getRecordKV(key);
-  cachedListenable?.listens.forEach((listener) => listener(newState));
-  setRecordKV(key, {
-    listens: cachedListenable?.listens ?? [],
-    state: newState,
-  });
+export function setRecordLKV<T>(db: StateController<DB>, key: string, newState: T): void {
+  return applySetRecordListenable(
+    (key) => getRecordKV(db, key),
+    (key, value) => setRecordKV(db, key, value),
+    key,
+    newState
+  );
 }
 
-export function deleteRecordLKV(deleteKV: DeleteRecordKV, key: string): void {
-  deleteKV(key);
+export function deleteRecordLKV(db: StateController<DB>, key: string): void {
+  applyDeleteRecordListenable((key) => deleteRecordKV(db, key), key);
 }
 
-/**
- * Subscribe to a state
- * @param getRecordKV
- * @param setRecordKV
- * @param key of the state
- * @param newListen which will be called every time the state changes
- * @returns unsubscribe function if the state exists, otherwise returns undefined
- */
-export function subscribeLKV<T>(
-  getRecordKV: GetRecordKV<Listenable<T>>,
-  setRecordKV: SetRecordKV<Listenable<T>>,
+export function subscribeRecordLKV<T>(
+  db: StateController<DB>,
   key: string,
   newListen: Listen<T>
 ): Unsubscribe | undefined {
-  const cachedListenable = getRecordKV(key);
-  newListen(cachedListenable?.state);
-  if (!isDefined(cachedListenable)) {
-    return undefined;
-  }
-  setRecordKV(key, {
-    ...cachedListenable,
-    listens: [...cachedListenable.listens, newListen],
-  });
-  return () => {
-    const cachedListenable = getRecordKV(key);
-    if (isDefined(cachedListenable)) {
-      // Remove unused listen
-      setRecordKV(key, {
-        ...cachedListenable,
-        listens: cachedListenable.listens.filter((el) => el !== newListen),
-      });
-    }
-  };
+  return applySubscribeRecordListenable(
+    (key) => getRecordKV(db, key),
+    (key, value) => setRecordKV(db, key, value),
+    key,
+    newListen
+  );
 }
