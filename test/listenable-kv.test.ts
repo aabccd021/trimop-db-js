@@ -1,22 +1,23 @@
+import { useState } from 'trimop';
+
 import {
   ClearKV,
+  clearKV,
+  clearLKV,
   DB,
   DeleteRecordKV,
+  deleteRecordKV,
+  deleteRecordLKV,
   GetRecordKV,
+  getRecordKV,
+  getRecordLKV,
   Listen,
   Listenable,
   SetRecordKV,
-  clearKV,
-  clearLKV,
-  deleteRecordKV,
-  deleteRecordLKV,
-  getRecordKV,
-  getRecordLKV,
   setRecordKV,
   setRecordLKV,
   subscribeLKV,
 } from '../src';
-import { useState } from 'trimop';
 
 describe('ListenableKV', () => {
   describe('get()', () => {

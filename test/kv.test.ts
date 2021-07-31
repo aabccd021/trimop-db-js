@@ -1,5 +1,6 @@
 import { useState } from 'trimop';
-import { DB, clearKV, deleteRecordKV, getRecordKV, setRecordKV } from '../src';
+
+import { clearKV, DB, deleteRecordKV, getRecordKV, setRecordKV } from '../src';
 
 describe('KV', () => {
   describe('getRecordKV', () => {

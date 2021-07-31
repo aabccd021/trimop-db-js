@@ -1,4 +1,4 @@
-import { StateController, isDefined } from 'trimop';
+import { isDefined, StateController } from 'trimop';
 
 export type DB = { readonly [key: string]: unknown };
 

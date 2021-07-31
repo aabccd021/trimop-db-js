@@ -1,6 +1,5 @@
-import { Unsubscribe, isDefined } from 'trimop';
+import { isDefined, Unsubscribe } from 'trimop';
 
-export type InitKV = () => string;
 export type ClearKV = () => void;
 export type DeleteRecordKV = (key: string) => void;
 export type GetRecordKV<T = unknown> = (key: string) => T | undefined;
@@ -12,10 +11,6 @@ export type Listenable<T> = {
   readonly state: T;
   readonly listens: readonly Listen<T>[];
 };
-
-export function initLKV(initKV: InitKV): string {
-  return initKV();
-}
 
 export function clearLKV(clearKV: ClearKV): void {
   clearKV();
@@ -44,20 +39,6 @@ export function setRecordLKV<T>(
 
 export function deleteRecordLKV(deleteKV: DeleteRecordKV, key: string): void {
   deleteKV(key);
-}
-
-export function setLKV<T>(
-  getRecordKV: GetRecordKV<Listenable<T>>,
-  setRecordKV: SetRecordKV<Listenable<T>>,
-  key: string,
-  newState: T
-): void {
-  const cachedListenable = getRecordKV(key);
-  cachedListenable?.listens.forEach((listener) => listener(newState));
-  setRecordKV(key, {
-    listens: cachedListenable?.listens ?? [],
-    state: newState,
-  });
 }
 
 /**
