@@ -1,8 +1,9 @@
 {
   "name": "trimop-kv-db",
-  "version": "0.1.3",
+  "version": "0.1.0",
   "description": "TRIMOP implementation of key-value database",
   "author": "aabccd021 <aabccd021@gmail.com>",
+  "repository": "git@github.com:aabccd021/trimop-kv-db-js.git",
   "license": "MIT",
   "files": [
     "dist"
@@ -20,7 +21,7 @@
     "lint": "eslint . --ext ts",
     "test": "jest --coverage --verbose",
     "please": "yarn tsc --noEmit && yarn lint --fix && yarn test ",
-    "release": "git pull origin main --no-edit && npm version patch && git push"
+    "pull-request": "git pull origin main --no-edit && npm version patch && git push && yarn open-cli https://github.com/aabccd021/trimop-kv-db-js/compare/main...$(git branch --show-current)"
   },
   "dependencies": {
     "trimop": "^0.1.7"
